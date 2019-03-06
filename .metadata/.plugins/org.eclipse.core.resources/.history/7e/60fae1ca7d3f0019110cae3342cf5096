@@ -10,11 +10,11 @@ import java.util.Map;
 
 public class Table 
 {	
-	private	Map<Integer, Integer>	tab;
+	private	Map	tab;
 	
 	public	Table()
 	{
-		tab = new HashMap<Integer, Integer>();
+		tab = new HashMap();
 	}
 	
 	public	void	add(int key, int data)
