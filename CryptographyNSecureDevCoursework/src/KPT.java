@@ -7,17 +7,6 @@ public class KPT {
 	// variable to store the final key obtained
 	private static int finalKey = 0;
 
-	public static void main(String[] args) throws FileNotFoundException {
-		//plain text file path
-		String plainTextFilePath = "src/Input_Files/pt1.txt";
-		//cipher text file path
-		String cypherTextFilePath = "src/Input_Files/ct1.txt";
-		//call method to get decrypted text using brute force attack
-		String finalPlainTextOutput = bruteForceAttack(plainTextFilePath, cypherTextFilePath);
-		//print the final decrypted text
-		System.out.println(finalPlainTextOutput);
-	}
-
 	public static String bruteForceAttack(String plainTextFile, String cipherTextFile) throws FileNotFoundException {
 		// read the Cipher text file contents in a single go
 		@SuppressWarnings("resource")
@@ -38,12 +27,12 @@ public class KPT {
 		System.out.println("The key is:   " + KPT.finalKey);
 
 		// call method to convert the cipher text hex into normal text hex values
-		String decryptedHex = decryptCipherHexToNormalTextHex(cipherTextFileLength, hexForCipherTextArray);
+		String decryptedHex = decryptCipherHexToNormalTextHex(cipherTextFileLength, hexForCipherTextArray, 0, "KPT");
 
 		// call method to convert each hex to readable string
-		String finalOutputString = hexToEnglishLetter(decryptedHex);
+		String finalOutputString = hexToEnglishLetter(decryptedHex, "kpt");
 		// return the decrypted sentence
-		return ("Final decrypted sentence: " + finalOutputString);
+		return ("The decrypted Text is: " + finalOutputString);
 	}
 
 	public static void getFinalKey(String eachCipherTextLine, String plainTextFileContent) {
@@ -66,9 +55,12 @@ public class KPT {
 		}
 	}
 
-	public static String decryptCipherHexToNormalTextHex(int cipherTextFileLength, String[] hexForCipherTextArray) {
+	public static String decryptCipherHexToNormalTextHex(int cipherTextFileLength, String[] hexForCipherTextArray,
+			int key, String algoUsed) {
 		// variable to store the decrypted hex values
 		String finalDecryptedHexOutput = "";
+		// variable to store decrypted cipher text hex integer value
+		int decryptedCipherHex = 0;
 		// loop to decrypt the cipher text hex and get a simple English hex string value
 		for (int counterCipherHexToNormalTextHex = 0; counterCipherHexToNormalTextHex < cipherTextFileLength; counterCipherHexToNormalTextHex++) {
 			// get each cipher text hex value
@@ -76,14 +68,25 @@ public class KPT {
 			// get int for each cipher text hex
 			int eachCipherTextHexInteger = Hex16.convert(eachCipherTextHex);
 			// decrypt each cipher text hex's integer value
-			int decryptedCipherHex = Coder.decrypt(KPT.finalKey, eachCipherTextHexInteger);
+			// if algorithm used is KPT, decrypt using KPT final key
+			if (algoUsed.equalsIgnoreCase("kpt")) {
+				decryptedCipherHex = Coder.decrypt(KPT.finalKey, eachCipherTextHexInteger);
+			} else { // else use key parameter
+				decryptedCipherHex = Coder.decrypt(key, eachCipherTextHexInteger);
+			}
 			// format the decrypted value
 			String normalTextHex = String.format("0x%04x", decryptedCipherHex);
-			// do not add a ',' to first input insertion
-			if (finalDecryptedHexOutput.length() == 0) {
-				// Initially add the final decrypted hex value to output string
-				finalDecryptedHexOutput += normalTextHex;
-			} else {
+			// if algorithm used is KPT, check for length before adding hex values
+			if (algoUsed.equalsIgnoreCase("kpt")) {
+				// do not add a ',' to first input insertion
+				if (finalDecryptedHexOutput.length() == 0) {
+					// Initially add the final decrypted hex value to output string
+					finalDecryptedHexOutput += normalTextHex;
+				} else {
+					// add the final decrypted hex value to output string
+					finalDecryptedHexOutput += "\r\n" + normalTextHex;
+				}
+			} else { // else append the hex output
 				// add the final decrypted hex value to output string
 				finalDecryptedHexOutput += "\r\n" + normalTextHex;
 			}
@@ -91,14 +94,22 @@ public class KPT {
 		// return the hex values for decrypted text
 		return finalDecryptedHexOutput;
 	}
-	
-	public static String hexToEnglishLetter(String hexForEngLetter) {
+
+	public static String hexToEnglishLetter(String hexForEngLetter, String algoUsed) {
+		// counter variable
+		int counter = 0;
 		// variable to store final output
 		String finalOutputString = "";
 		// array to store all decrypted hex values split by new line
 		String[] hexForDecryptedOutput = hexForEngLetter.split("\r\n");
+		// if algorithm used is KPT, counter starts from 0
+		if (algoUsed.equalsIgnoreCase("kpt")) {
+			counter = 0;
+		} else { // else counter starts from 1
+			counter = 1;
+		}
 		// loop to convert each hex value to a meaningful letter
-		for (int counter = 0; counter < hexForDecryptedOutput.length; counter++) {
+		for (; counter < hexForDecryptedOutput.length; counter++) {
 			// get each hex value
 			String eachLetterHex = hexForDecryptedOutput[counter];
 			// get integer for hex
@@ -110,8 +121,11 @@ public class KPT {
 			// build final string
 			finalOutputString += (char) c0;
 			// if remainder is not zero, then add to built up string
-			if (c1 != 0)
+			if (c1 != 0) {
 				finalOutputString += (char) c1;
+			} else { // else do nothing for now
+				continue;
+			}
 		}
 		// return final meaningful string
 		return finalOutputString;
