@@ -7,15 +7,16 @@ public class CTO {
 	public static int countNumberOfBlocksNeeded(String cipherFilePath) throws FileNotFoundException {
 		// Loop to check how many blocks are needed to decrypt
 		for (int counterForBlocks = 63; counterForBlocks > 1; counterForBlocks--) {
-			//get decrypted text with cut blocks as counter value
+			// get decrypted text with cut blocks as counter value
 			String decryptedText = bruteForceAttack(cipherFilePath, counterForBlocks);
-			//check if the decryption is done or not
+			// check if the decryption is done or not
 			if (!decryptedText.equals("No decrypted text using CTO")) {
-				//if decrypted text is found and is in English, return the number of blocks needed
+				// if decrypted text is found and is in English, return the number of blocks
+				// needed
 				return 64 - counterForBlocks;
 			}
 		}
-		//if nothing found, return number of blocks as zero
+		// if nothing found, return number of blocks as zero
 		return 0;
 	}
 
@@ -32,7 +33,7 @@ public class CTO {
 		if (blocksNeeded != 0) { // if not zero
 			cipherTextHexLength = cipherTextHexLength - blocksNeeded;
 		}
-		//return the key and the decrypted text
+		// return the key and the decrypted text
 		return findKeyAndDecrypt(cipherTextHexLength, cipherTextHexArray);
 	}
 
@@ -40,17 +41,17 @@ public class CTO {
 		// Iterate through all possible keys
 		for (int counterForKey = 0; counterForKey < 65536; counterForKey++) {
 			// call KPT method to cipher text to normal text hex
-			String normalTextHex = KPT.decryptCipherHexToNormalTextHex(cipherTextHexLength, cipherTextHexArray, counterForKey,
-					"CTO");
+			String normalTextHex = KPT.decryptCipherHexToNormalTextHex(cipherTextHexLength, cipherTextHexArray,
+					counterForKey, "CTO");
 			// call KPT method to convert the normal text hex to readable text
 			String decryptedText = KPT.hexToEnglishLetter(normalTextHex, "CTO");
-			//check if the decrypted text is in English or not
+			// check if the decrypted text is in English or not
 			if (checkIfDecryptedTextEnglish(decryptedText)) {
-				//if English, return and exit
+				// if English, return and exit
 				return "The Key is: " + counterForKey + "\r\n" + "The decrypted Text is: " + decryptedText;
 			}
 		}
-		//if not English, return not found
+		// if not English, return not found
 		return "No decrypted text using CTO";
 	}
 
@@ -60,7 +61,7 @@ public class CTO {
 				|| text.indexOf("and ") != -1 || text.indexOf(" and") != -1 || text.indexOf("That ") != -1
 				|| text.indexOf(" that") != -1 || text.indexOf("that ") != -1 || text.indexOf("have ") != -1)
 				&& (text.indexOf(" ") != -1)) ? true : false;
-		//return final result
+		// return final result
 		return isEnglishText;
 	}
 
